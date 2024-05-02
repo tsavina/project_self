@@ -30,6 +30,7 @@ class Calculator:
         week_spent = sum(record.amount for record in self.records if start_of_week <= dt.datetime.strptime(record.date, '%d.%m.%Y') <= end_of_week.strftime('%d.%m.%Y'))
         return week_spent
 
+""" calculate money in 3 currencies"""
 class CashCalculator(Calculator):
     def __init__(self, limit):
         super().__init__(limit)
@@ -37,22 +38,25 @@ class CashCalculator(Calculator):
     def get_today_cash_remained(self, currency):
         USD_RATE = 80
         EURO_RATE = 100
+        currency_symbol = {"rub": "руб", "usd": "USD", "euro": "Euro"}
+        currency_str = currency_symbol.get(currency, "руб")
         spent_today = sum(record.amount * (USD_RATE if currency == "usd" else EURO_RATE if currency == "euro" else 1) for record in self.records)
         if spent_today < self.limit:
             return f"На сегодня осталось {self.limit-spent_today} руб/USD/Euro"
         if spent_today == self.limit:
             return f"Денег нет, держись"
         if spent_today > self.limit:
-            return f"Денег нет, держись: твой долг - {abs(self.limit-spent_today)} руб/USD/Euro"
+            return f"Денег нет, держись: твой долг - {abs(self.limit-spent_today)} {currency_str}"
 
+""" calculate calories"""
 class CaloriesCalculator(Calculator):
     def __init__(self, limit):
         super().__init__(limit)
 
+    """ how many calories left """
     def get_calories_remained(self):
-        eaten_today = sum(record.amount for record in self.records)
-        if  eaten_today < self.limit:
-            return f"Сегодня можно съесть что-нибудь ещё, но с общей калорийностью не более {self.limit-eaten_today} кКал"
+        if  self.get_today_stats() < self.limit:
+            return f"Сегодня можно съесть что-нибудь ещё, но с общей калорийностью не более {self.limit-self.get_today_stats()} кКал"
         else:
             return f"Хватит есть!"
 
